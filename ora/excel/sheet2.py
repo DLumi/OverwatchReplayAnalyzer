@@ -210,7 +210,7 @@ class Sheet:
                 cell = Config.LEFT[key]['chara' + str(i + 1)]
             else:
                 cell = Config.RIGHT[key]['chara' + str(i - 5)]
-            self.set_cell_value(cell, chara_capitalize(player.chara), 1)
+            self.set_cell_value(cell, chara_capitalize(player.hero), 1)
 
     def _append_ult_charge(self, players):
         """

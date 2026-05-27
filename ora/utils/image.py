@@ -3,6 +3,7 @@ import numpy as np
 from skimage import transform as tf
 from skimage.exposure import adjust_log
 from skimage.filters import threshold_otsu
+from pathlib import Path
 
 REMOVE_NUMBER_VERTICAL_EDGE_LEFT = 0
 REMOVE_NUMBER_VERTICAL_EDGE_RIGHT = 1
@@ -155,14 +156,20 @@ def similarity(img, img2):
 
     return float(s)/(w*h)
 
-def read(path):
+
+def read_image(path, flags=cv2.IMREAD_COLOR):
     """
-    Read RGB channels of an image with given path from file system.
-    @Author: Leavebody
-    @param path: path of image file
-    @return: a numpy.ndarray object of read image, with only RGB channels.
+    Load an OpenCV image from a Unicode path.
     """
-    return cv2.imread(path)
+    path = Path(path)
+
+    data = np.fromfile(path, dtype=np.uint8)
+    img = cv2.imdecode(data, flags)
+
+    if img is None:
+        raise ValueError(f"Failed to decode image: {path}")
+
+    return img
 
 
 def read_with_transparency(path):
@@ -184,20 +191,6 @@ def read_bw(path):
     """
     img_gray = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
     return img_gray > 127
-
-def float_to_uint8(img):
-    return (img * 255).astype('uint8')
-
-def resize(img, dest_width, dest_height):
-    """
-    Resize an image with given destination dimensions.
-    @Author: Appcell
-    @param img: the image to be resized
-    @dest_width: width of image after resizing
-    @dest_height: height of image after resizing
-    @return: a numpy.ndarray object of resized image.
-    """
-    return cv2.resize(img, (dest_width, dest_height))
 
 
 # def contrast_adjust_log(img, gain):

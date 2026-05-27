@@ -387,9 +387,9 @@ class Game(object):
         """
         for ind in range(1, len(players_list) - 1):
             for ind_player in range(12):
-                if players_list[ind - 1][ind_player].chara \
-                == players_list[ind + 1][ind_player].chara:
-                    players_list[ind][ind_player].chara = players_list[ind - 1][ind_player].chara
+                if players_list[ind - 1][ind_player].hero \
+                == players_list[ind + 1][ind_player].hero:
+                    players_list[ind][ind_player].hero = players_list[ind - 1][ind_player].hero
 
     def _freeze_death_status(self, players_list):
         """ Freeze player status when chara is dead
@@ -467,19 +467,19 @@ class Game(object):
             for player in players:
                 if data['team'] == 0:
                     if is_death_validated:
-                        if OW.get_chara_name(data['chara']) == player.chara \
+                        if OW.get_chara_name(data['chara']) == player.hero \
                         and player.is_dead is False and player.index < 6:
                             return player.index
                     else:
-                        if OW.get_chara_name(data['chara']) == player.chara and player.index < 6:
+                        if OW.get_chara_name(data['chara']) == player.hero and player.index < 6:
                             return player.index
                 elif data['team'] == 1:
                     if is_death_validated:
-                        if OW.get_chara_name(data['chara']) == player.chara \
+                        if OW.get_chara_name(data['chara']) == player.hero \
                         and player.is_dead is False and player.index >= 6:
                             return player.index
                     else:
-                        if OW.get_chara_name(data['chara']) == player.chara and player.index >= 6:
+                        if OW.get_chara_name(data['chara']) == player.hero and player.index >= 6:
                             return player.index
                 else:
                     return -1
@@ -626,8 +626,8 @@ class Game(object):
                     flag_player_switched = False
                     for ind_frame_tmp in range(
                             ind_frame - searched_frame_num + 1, ind_frame + 1):
-                        if players_list[ind_frame_tmp][ind].chara \
-                        != players_list[ind_frame_tmp - 1][ind].chara:
+                        if players_list[ind_frame_tmp][ind].hero \
+                        != players_list[ind_frame_tmp - 1][ind].hero:
                             flag_player_switched = True
                             break
                     # 3) For D.Va, is there a status change?
@@ -635,7 +635,7 @@ class Game(object):
                     for ind_frame_tmp in range(
                             ind_frame - searched_frame_num + 1, 
                             min(players_list_len - 1, ind_frame + searched_frame_num)):
-                        if players_list[ind_frame_tmp][ind].chara == OW.DVA \
+                        if players_list[ind_frame_tmp][ind].hero == OW.DVA \
                         and players_list[ind_frame_tmp][ind].dva_status \
                         != players_list[ind_frame_tmp - 1][ind].dva_status:
                             flag_dva_status_change = True
@@ -673,8 +673,8 @@ class Game(object):
                         flag_player_switched = False
                         for ind_frame_tmp in range(
                                 ind_frame, unnatural_frame_ind):
-                            if players_list[ind_frame_tmp][ind].chara \
-                            != players_list[ind_frame_tmp - 1][ind].chara:
+                            if players_list[ind_frame_tmp][ind].hero \
+                            != players_list[ind_frame_tmp - 1][ind].hero:
                                 flag_player_switched = True
                                 break
                         # 3) For D.Va, is there a status change?
@@ -682,7 +682,7 @@ class Game(object):
                         for ind_frame_tmp in range(
                                 ind_frame - searched_frame_num + 1, 
                                 min(players_list_len - 1, ind_frame + searched_frame_num)):
-                            if players_list[ind_frame_tmp][ind].chara == OW.DVA \
+                            if players_list[ind_frame_tmp][ind].hero == OW.DVA \
                             and players_list[ind_frame_tmp][ind].dva_status \
                             != players_list[ind_frame_tmp - 1][ind].dva_status:
                                 flag_dva_status_change = True
@@ -717,7 +717,7 @@ class Game(object):
             frame = frames[ind_frame]
             players = players_list[ind_frame]
             for ind_player in range(12):
-                if players[ind_player].chara == OW.DVA:
+                if players[ind_player].hero == OW.DVA:
                     # 1) detect MEKA DOWN event
                     flag_meka_down = False
                     for killfeed in frame.killfeeds:
@@ -741,8 +741,8 @@ class Game(object):
                         and players_list[ind_frame - 1][ind_player].ult_charge > 0 \
                         and players_list[ind_frame - 1][ind_player].dva_status \
                         == OW.IS_WITHOUT_MEKA) \
-                    or (players_list[ind_frame - 1][ind_player].chara \
-                        != players_list[ind_frame][ind_player].chara):
+                    or (players_list[ind_frame - 1][ind_player].hero \
+                        != players_list[ind_frame][ind_player].hero):
                         flag_chara_switched = True
                         break
 

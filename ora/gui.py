@@ -36,9 +36,9 @@ class Gui(object):
         # run
         self.run_btn = tkinter.Button(self.root, text="Analyze", command=self.run)
         self.run_btn.pack()
-        self.create_text()
+        # self.create_text()
         # check for update
-        self.root.after(500, self.check_update)
+        # self.root.after(500, self.check_update)
 
     def create_path(self):
         width_msg = 100

@@ -147,7 +147,7 @@ class Sheet:
     def _hp_ult_charge_append(self, players, time):
         hp_ult_charge_row = [utils.time_format(time)]
         for player in players:
-            chara = utils.chara_capitalize(player.chara)
+            chara = utils.chara_capitalize(player.hero)
             hp = 0 if player.is_dead else 100  # Only an indication of dead or alive now
             ult_charge = player.ult_charge
             hp_ult_charge_row += [chara, hp, ult_charge]

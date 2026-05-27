@@ -222,14 +222,14 @@ def get_ult_icon_pos(index, gametype, version):
 def get_ult_icon_ref(index, gametype, version):
     if gametype == GAMETYPE_OWL:
         if index < 6:
-            return ImageUtils.read("./images/ultimate/awayUlt.png")
+            return ImageUtils.read_image("./images/ultimate/awayUlt.png")
         else:
-            return ImageUtils.read("./images/ultimate/homeUlt.png")
+            return ImageUtils.read_image("./images/ultimate/homeUlt.png")
     if gametype == GAMETYPE_CUSTOM:
         if index < 6:
-            return ImageUtils.read("./images/ultimate/awayUlt.png")
+            return ImageUtils.read_image("./images/ultimate/awayUlt.png")
         else:
-            return ImageUtils.read("./images/ultimate/awayUlt.png")
+            return ImageUtils.read_image("./images/ultimate/awayUlt.png")
 
 def get_tf_shear(index, gametype, version):
     if index < 6:
@@ -271,7 +271,7 @@ def get_ult_charge_numbers_ref(gametype, version):
         ult_charge_icons_observed_ref_owl = []
         for i in range(0, 10):
             img = ImageUtils.rgb_to_gray(
-                ImageUtils.read("./images/ultimate/owl/" + str(i) + ".png"))
+                ImageUtils.read_image("./images/ultimate/owl/" + str(i) + ".png"))
             ult_charge_icons_ref_owl.append(ImageUtils.resize(
                 img,
                 int(img.shape[1] * get_ui_variable("ULT_CHARGE_IMG_HEIGHT", gametype, version)/img.shape[0]),
@@ -291,7 +291,7 @@ def get_ult_charge_numbers_ref(gametype, version):
         ult_charge_icons_observed_ref_owl = []
         for i in range(0, 10):
             img = ImageUtils.rgb_to_gray(
-                ImageUtils.read("./images/ultimate/owl/" + str(i) + ".png"))
+                ImageUtils.read_image("./images/ultimate/owl/" + str(i) + ".png"))
             ult_charge_icons_ref_owl.append(ImageUtils.resize(
                 img,
                 int(img.shape[1] * get_ui_variable("ULT_CHARGE_IMG_HEIGHT", gametype, version)/img.shape[0]),
@@ -413,7 +413,7 @@ def get_killfeed_icons_ref(gametype, version):
         A dict of all reference killfeed icons
     """
     return {chara: ImageUtils.resize(
-            ImageUtils.read("./images/icons/" + chara + ".png"),
+            ImageUtils.read_image("./images/icons/" + chara + ".png"),
             get_ui_variable("KILLFEED_ICON_WIDTH", gametype, version),
             get_ui_variable("KILLFEED_ICON_HEIGHT", gametype, version)) \
             for chara in KILLFEED_OBJECT_LIST}
@@ -432,7 +432,7 @@ def get_assist_icons_ref(gametype, version):
         A dict of all reference killfeed assist avatars
     """
     return {chara: ImageUtils.resize(
-            ImageUtils.read("./images/assists/" + chara + ".png"),
+            ImageUtils.read_image("./images/assists/" + chara + ".png"),
             get_ui_variable("ASSIST_ICON_WIDTH", gametype, version), get_ui_variable("ASSIST_ICON_HEIGHT", gametype, version)) \
             for chara in ASSIST_CHARACTER_LIST}
 
@@ -517,7 +517,7 @@ def get_ability_icons_ref(gametype, version):
     for (chara, ability_list) in ABILITY_LIST.items():
         icons_list = []
         for i in ability_list:
-            icon = ImageUtils.rgb_to_gray(ImageUtils.read(
+            icon = ImageUtils.rgb_to_gray(ImageUtils.read_image(
                 "./images/abilities/" + chara + "/" + str(i) + ".png"))
             icons_list.append(ImageUtils.resize(
                 icon,
@@ -579,4 +579,4 @@ def get_replay_icon_ref(gametype, version):
         A dict of replay icons. Actually this is only for OWL games.
     """
 
-    return ImageUtils.read("./images/replay.png")
+    return ImageUtils.read_image("./images/replay.png")

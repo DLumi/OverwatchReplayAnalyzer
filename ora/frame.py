@@ -4,8 +4,8 @@ from skimage import measure
 from . import overwatch as OW
 from . import gui as Gui
 from .utils import image as ImageUtils
-from .player import Player
-from .killfeed import Killfeed
+from .player_old import Player
+from .killfeed_old import Killfeed
 from . import pool
 
 import time
@@ -52,11 +52,11 @@ class Frame(object):
 
         print(self.time)
         
-        self.get_players()
-
-        self.get_killfeeds()
-        self.validate()
-        self.free()
+        # self.get_players()
+        #
+        # self.get_killfeeds()
+        # self.validate()
+        # self.free()
 
     def free(self):
         """Free RAM by removing images from the Frame instance.
@@ -106,12 +106,25 @@ class Frame(object):
             else:
                 team = self.game.team_names[OW.RIGHT]
 
-            results.append(pool.PROCESS_POOL.apply_async(Player, 
-                args=(i, avatars, team, image, game_type, game_version, ult_charge_numbers_ref, self.time),
-                callback=self.player_callback))
+            # results.append(pool.PROCESS_POOL.apply_async(Player,
+            #     args=(i, avatars, team, image, game_type, game_version, ult_charge_numbers_ref, self.time),
+            #     callback=self.player_callback))
+            player = Player(
+                i,
+                avatars,
+                team,
+                image,
+                game_type,
+                game_version,
+                ult_charge_numbers_ref,
+                self.time,
+            )
+
+            self.player_callback(player)
+            results.append(player)
         
-        for res in results:
-            res.wait()
+        # for res in results:
+        #     res.wait()
         
     def get_team_colors_from_image(self):
         """Get team colors from this frame.

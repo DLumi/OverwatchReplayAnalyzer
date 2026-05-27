@@ -393,7 +393,7 @@ class Sheet:
             d = {
                 'time': time,
                 'subject player': get_player_name(player.index, self.game.name_players),
-                'subject chara': player.chara,
+                'subject chara': player.hero,
                 '_$color': {
                     'subject player': Config.team_colors[get_player_team_index(player.index)]
                 }
@@ -404,7 +404,7 @@ class Sheet:
                     d['action'] = 'Ult ready'
                     self._append(**d)
                 elif previous_player.is_ult_ready and not player.is_ult_ready:
-                    d['action'] = 'Meka up' if player.dva_status == 1 and player.chara == 'dva' else 'Ult used'
+                    d['action'] = 'Meka up' if player.dva_status == 1 and player.hero == 'dva' else 'Ult used'
                     self._append(**d)
             else:
                 if player.is_ult_ready:
@@ -427,19 +427,19 @@ class Sheet:
         previous_charas = frames[index - 1].players
         next_charas = frames[index + 1].players
         for i, player in enumerate(players):
-            top_chara = previous_charas[i].chara
-            next_chara = next_charas[i].chara
-            if top_chara != player.chara:
+            top_chara = previous_charas[i].hero
+            next_chara = next_charas[i].hero
+            if top_chara != player.hero:
                 if top_chara == next_chara:
                     continue
-                elif player.chara == next_chara:
+                elif player.hero == next_chara:
                     d = {
                         'time': time - 1.5,
                         'action': 'Hero switch',
                         'subject player': get_player_name(player.index, self.game.name_players),
-                        'subject chara': player.chara,
+                        'subject chara': player.hero,
                         'comments': 'Switch from {} to {}'.format(utils.chara_capitalize(top_chara),
-                                                                  utils.chara_capitalize(player.chara)),
+                                                                  utils.chara_capitalize(player.hero)),
 
                         '_$color': {
                             'subject player': Config.team_colors[get_player_team_index(player.index)],
