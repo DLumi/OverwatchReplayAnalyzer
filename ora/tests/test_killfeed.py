@@ -4,7 +4,8 @@ import cv2
 import pytest
 from pytest_check import check
 
-from ora.killfeed import KillFeedEntry, KFParseContext, get_kilfeed_entry_images
+from ora.detection.killfeed import KillFeedEntry, KFParseContext
+from ora.detection.killfeed.arrows import get_killfeed_entry_images
 from ora.tests.test_killfeed_cases import (TC_ENVIRONMENTAL, TC_CRITICAL, TC_ASSIST, TC_SINGLE,
                                            TC_ABILITIES, TC_ARROW_HARD,
                                            heroes)
@@ -58,7 +59,7 @@ def entry_tester(im_name: str, entries: list[KillFeedEntry], image_paths: dict[s
     image_path = image_paths[im_name]
     im = read_image(image_path)
 
-    ent_im = get_kilfeed_entry_images(frame=im, ref=arrow_ref,
+    ent_im = get_killfeed_entry_images(frame=im, ref=arrow_ref,
                                       debug=False, entry_height_pc=0.15)
 
     # cv2.waitKey(0)

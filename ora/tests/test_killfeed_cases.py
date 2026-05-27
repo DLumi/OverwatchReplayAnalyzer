@@ -1,4 +1,4 @@
-from ora.killfeed import KillFeedEntry
+from ora.detection.killfeed import KillFeedEntry
 from ora.player import KFPlayer
 from ora.hero import populate_heroes
 

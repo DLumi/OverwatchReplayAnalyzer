@@ -3,11 +3,13 @@ import numpy as np
 
 from dataclasses import dataclass, field as dc_field
 
-from .player import KFPlayer
-from .utils.template_matching import percent_roi_to_pixels, find_template_multiscale
-from .utils.killfeed_detection import detect_killfeed_presence
-from .utils.killfeed_processor import get_kilfeed_entry_images, assign_roles, get_used_ability, detect_heroes_2d
-from .hero import Hero, Ability
+from ...player import KFPlayer
+from ...utils.template_matching import percent_roi_to_pixels
+from .presence import detect_killfeed_presence
+from .arrows import get_killfeed_entry_images
+from .heroes import detect_heroes_2d
+from .abilities import get_used_ability
+from ...hero import Hero, Ability
 
 _KF_ARROW_REF = cv2.imread(r"C:\PyProjects\OverwatchDataAnalysis\images\ui\killfeed_arrow2.png",
                            cv2.IMREAD_GRAYSCALE)
@@ -28,9 +30,7 @@ class KFParseContext:
 
 @dataclass(frozen=False)
 class KillFeedEntry:
-    """Class of a Killfeed object.
-
-    Contains info about one killfeed row. """
+    """Contains info about one killfeed row."""
 
     frame: int
     row: int
@@ -47,7 +47,6 @@ class KillFeedEntry:
     def _players_equal(p1, p2):
         if p1 is None or p2 is None:
             return p1 is p2
-
         return (
                 p1.hero == p2.hero
                 and p1.team == p2.team
@@ -98,7 +97,6 @@ class KillFeedEntry:
                                       portrait_type='kf_main',
                                       debug=debug)
         roles = assign_roles(found_main, context.arrow_center, debug=debug)
-        # print(roles)
 
         if not found_main:
             print(f'F#{context.frame_i}:{context.row_i} Heroes not found!')
@@ -114,10 +112,8 @@ class KillFeedEntry:
         context.killed_box = killed_hero_box
 
         if 'subject' not in roles:
-            # print('No assist or ability')
             return killfeed_entry, context
 
-        # cv2.waitKey(0)
         killer, _, killer_box, killer_team = roles['subject']
         context.killer_box = killer_box
         context.killer_team = killer_team
@@ -128,63 +124,40 @@ class KillFeedEntry:
     def _detect_left_modifiers(self, context: KFParseContext, debug: bool = False):
         arrow_box_x, _, arrow_box_w, _ = context.arrow_box
 
-        # if space between killer hero portrait and arrow is higher than arrow width
-        # => there must be assist / ability / critical / environmental modifier
         killer_box_x, _, killer_box_w, _ = context.killer_box
         right_side = killer_box_x + killer_box_w
 
         if (arrow_box_x - right_side) < arrow_box_w * 2.5:
-            # print('No assist or ability')
             return
 
-        # limiting the search space to increase chances of a good match
         special_roi = context.image[:, right_side:arrow_box_x]
-
-        # cv2.imshow('special_roi', special_roi)
 
         found_assist = detect_heroes_2d(frame=special_roi, hero_list=context.heroes,
                                         portrait_type='kf_assist', debug=True)
 
         if found_assist:
-            # reassign team colors for assists, cause detection by color is inconsistent,
-            # and only killer can have assists anyway
             found_assist = [(hero, center, box, context.killer_team) for (hero, center, box, team) in found_assist]
-
             self.assists = [KFPlayer(team=team, hero=hero) for (hero, _, _, team) in found_assist]
 
-            # cropping assists out of the search area to see if we need to look for any other modifiers
-            _, _, assist_box, _ = found_assist[-1]  # furthest right
+            _, _, assist_box, _ = found_assist[-1]
             assist_box_x, _, assist_box_w, _ = assist_box
             right_side = assist_box_x + assist_box_w
             region_right_bound = special_roi.shape[1]
 
-            # print(region_right_bound - right_side, arrow_box_w)
-
             if (region_right_bound - right_side) < arrow_box_w * 1.5:
-                # print('No ability, no critical')
                 return
 
             special_roi = special_roi[:, right_side:arrow_box_x]
-            # cv2.imshow('special_roi', special_roi)
 
-        # --------------------------------------------------
-        # Detecting ability / ultimate used
-        # --------------------------------------------------
-
-        # print('-----------------')
         found_ability = get_used_ability(frame=special_roi, hero=self.player1.hero, debug=False)
 
         if found_ability:
             ability, _, ability_box, _ = found_ability
             self.ability = ability
 
-            # cropping ability out of the search area to see if we need to look for any other modifiers
             ability_box_x, _, ability_box_w, _ = ability_box
             right_side = ability_box_x + ability_box_w
             region_right_bound = special_roi.shape[1]
-
-            # special_roi = special_roi[:, right_side:arrow_box_x]
-            # cv2.imshow('special_roi', special_roi)
 
             if (region_right_bound - right_side) < arrow_box_w:
                 return
@@ -200,10 +173,8 @@ class KillFeedEntry:
         killer_box_x, _, _, _ = context.killed_box
 
         if (killer_box_x - arrow_box_right_side) < arrow_box_w * 2:
-            # print('No environmental')
             return
 
-        # limiting the search space to increase chances of a good match
         special_roi = context.image[:, arrow_box_right_side:killer_box_x]
 
         found_environmental = get_used_ability(frame=special_roi, hero=None, debug=False)
@@ -211,18 +182,29 @@ class KillFeedEntry:
         if found_environmental:
             self.is_environmental = True
 
-        return
+
+def assign_roles(heroes: list, arrow_center: tuple[int, int],
+                 debug: bool = False) -> dict:
+    if len(heroes) > 2:
+        if debug:
+            print(heroes)
+        raise ValueError('Detected more than 2 heroes in KillFeed!')
+
+    roles = {}
+    for hero in heroes:
+        hero_center_x = hero[1][0]
+        role = 'subject' if hero_center_x < arrow_center[0] else 'object'
+        if role in roles:
+            print('WARNING! Overwriting roles')
+        roles[role] = hero
+
+    return roles
 
 
 class KillFeed:
-    """Killfeed object containing the info about the killfeed entries throughout the match"""
+    """Killfeed object containing the info about the killfeed entries throughout the match."""
 
     def __init__(self, roi: list[float, float, float, float] = (0.73, 0.0, 1.0, 0.25)):
-        """Killfeed constructor
-
-        Args:
-            roi: XYXY coordinates to look for killfeed"""
-
         self.entries = []
         self.roi = roi
 
@@ -235,7 +217,7 @@ class KillFeed:
         if not detect_killfeed_presence(search_area):
             return
 
-        image_entries = get_kilfeed_entry_images(frame=search_area, ref=_KF_ARROW_REF)
+        image_entries = get_killfeed_entry_images(frame=search_area, ref=_KF_ARROW_REF)
 
         for img, arrow_center, arrow_box in image_entries:
             self.entries.append(KillFeedEntry.from_image(image=img,
