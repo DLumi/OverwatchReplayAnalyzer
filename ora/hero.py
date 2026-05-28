@@ -27,8 +27,8 @@ class Ability:
 class Hero:
     name: str
 
-    portrait2d: np.array = None
-    portrait3d: np.array = None
+    portrait2d: np.ndarray | None = None
+    portrait3d: np.ndarray | None = None
 
     abilities: list[Ability] = None
 

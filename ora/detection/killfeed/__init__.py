@@ -1,1 +1,2 @@
-from .main import KillFeedEntry, KFParseContext, KillFeed
+from .entry import KFParseContext, KillFeedEntry
+from .main import KillFeed

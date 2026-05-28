@@ -75,8 +75,8 @@ def fill_closed_edge_shapes(edges: np.ndarray, min_area: int = 5,
     return filled
 
 
-def prepare_2d_portrait(image: np.ndarray,
-                        margin: tuple[int, int] = (50, 50)) -> tuple[np.ndarray, np.ndarray | None]:
+def prepare_template(image: np.ndarray,
+                     margin: tuple[int, int] = (50, 50)) -> tuple[np.ndarray, np.ndarray | None]:
     """Crop margins and split image into BGR template and alpha mask.
 
     Args:

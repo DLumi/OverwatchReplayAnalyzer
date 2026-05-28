@@ -2,8 +2,6 @@
 @Author: Xiaochen (leavebody) Li 
 """
 import cv2
-import numpy as np
-from math import sqrt
 
 
 class VideoLoader:

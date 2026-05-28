@@ -4,8 +4,8 @@ import cv2
 import pytest
 from pytest_check import check
 
-from ora.detection.killfeed import KillFeedEntry, KFParseContext
-from ora.detection.killfeed.arrows import get_killfeed_entry_images
+from ora.detection.killfeed import KFParseContext, KillFeedEntry
+from ora.detection.killfeed.main import get_killfeed_entry_images
 from ora.tests.test_killfeed_cases import (TC_ENVIRONMENTAL, TC_CRITICAL, TC_ASSIST, TC_SINGLE,
                                            TC_ABILITIES, TC_ARROW_HARD,
                                            heroes)
