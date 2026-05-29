@@ -18,6 +18,14 @@ class Ability:
     icon: np.ndarray
     bind: str | None
 
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Ability):
+            return NotImplemented
+        return self.category == other.category and self.name == other.name
+
+    def __hash__(self) -> int:
+        return hash((self.category, self.name))
+
     def __repr__(self):
         n = self.name if self.name != 'Quick melee' else '✊'
         return f'Ability({n})'
@@ -31,6 +39,14 @@ class Hero:
     portrait3d: np.ndarray | None = None
 
     abilities: list[Ability] = None
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Hero):
+            return NotImplemented
+        return self.name == other.name
+
+    def __hash__(self) -> int:
+        return hash(self.name)
 
     def __repr__(self):
         return f'Hero({self.name})'
