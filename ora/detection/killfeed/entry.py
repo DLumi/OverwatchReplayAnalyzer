@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field as dc_field
 
-import cv2
 import numpy as np
 
 from .abilities import get_used_ability
@@ -9,8 +8,13 @@ from .heroes import detect_heroes_2d
 from ...hero import Hero, Ability
 from ...player import KFPlayer
 
-_KF_ARROW_REF = cv2.imread(r"C:\PyProjects\OverwatchDataAnalysis\images\ui\killfeed_arrow2.png",
-                           cv2.IMREAD_GRAYSCALE)
+
+_TEAM_COLOR = {1: '\033[94m', 0: '\033[91m'}  # bright blue, bright red
+_RESET = '\033[0m'
+
+
+def _c(text: str, team: int) -> str:
+    return f"{_TEAM_COLOR.get(team, '')}{text}{_RESET}"
 
 
 @dataclass
@@ -60,14 +64,15 @@ class KillFeedEntry:
         return (self.frame > other.frame) or (self.frame == other.frame and self.row > other.row)
 
     def __repr__(self):
-        maybe_p1 = self.player1.hero if self.player1 else ''
+        maybe_p1 = _c(str(self.player1.hero), self.player1.team) if self.player1 else ''
         maybe_critical = '🎯' if self.is_critical else ''
         maybe_ability = self.ability if self.ability is not None else ''
-        maybe_assists = '++[' + ''.join([f'{x.hero},' for x in self.assists]) + ']' \
+        maybe_assists = '++[' + ''.join([f'{_c(str(x.hero), x.team)},' for x in self.assists]) + ']' \
             if self.assists else ''
         maybe_environmental = '🤸' if self.is_environmental else ''
-        return (f'#{self.row}: {maybe_p1}{maybe_assists} '
-                f'{maybe_ability}{maybe_critical}➜{maybe_environmental} {self.player2.hero}')
+        p2 = _c(str(self.player2.hero), self.player2.team)
+        return (f'#{self.frame}:{self.row}: {maybe_p1}{maybe_assists} '
+                f'{maybe_ability}{maybe_critical}➜{maybe_environmental} {p2}')
 
     @classmethod
     def from_image(cls, context: KFParseContext):
