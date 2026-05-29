@@ -4,13 +4,16 @@ from collections import Counter, defaultdict
 
 from . import KillFeedEntry
 from .arrows import detect_killfeed_arrows
-from .entry import _KF_ARROW_REF, KFParseContext
+from .entry import KFParseContext
 
 from ...hero import Ability
 from ...player import KFPlayer
 from ...utils.box_proc import percent_roi_to_pixels
 from .presence import detect_killfeed_presence
 
+
+_KF_ARROW_REF = cv2.imread(r"C:\PyProjects\OverwatchDataAnalysis\images\ui\killfeed_arrow3.png",
+                           cv2.IMREAD_UNCHANGED)
 
 class KillFeed:
     """Killfeed object containing the info about the killfeed entries throughout the match."""
