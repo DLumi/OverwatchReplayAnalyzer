@@ -19,7 +19,7 @@ class KillFeed:
     """Killfeed object containing the info about the killfeed entries throughout the match."""
 
     def __init__(self, roi: list[float, float, float, float] = (0.73, 0.0, 1.0, 0.25),
-                 window_frames: int = 12):
+                 window_frames: int = 60):
         self.entries: list[KillFeedEntry] = []
         self.roi = roi
         self.window_frames = window_frames
@@ -33,23 +33,30 @@ class KillFeed:
 
     def update_from_frame(self, frame: np.ndarray, heroes: list, frame_i: int):
         search_area = self._get_roi_image(frame=frame)
-        if not detect_killfeed_presence(search_area):
-            return
+        self.entries.extend(process_killfeed_frame(search_area, frame_i, heroes))
 
-        image_entries = get_killfeed_entry_images(frame=search_area, ref=_KF_ARROW_REF)
 
-        for row_i, (img, arrow_center, arrow_box) in enumerate(image_entries):
-            context = KFParseContext(
-                image=img,
-                heroes=heroes,
-                arrow_center=arrow_center,
-                arrow_box=arrow_box,
-                frame_i=frame_i,
-                row_i=row_i,
-            )
-            entry = KillFeedEntry.from_image(context)
-            if entry is not None:
-                self.entries.append(entry)
+def process_killfeed_frame(roi: np.ndarray, frame_i: int, heroes: list) -> list[KillFeedEntry]:
+    """Detect killfeed entries in a pre-cropped ROI. Stateless; safe to call from worker processes."""
+    if not detect_killfeed_presence(roi):
+        return []
+
+    image_entries = get_killfeed_entry_images(frame=roi, ref=_KF_ARROW_REF)
+
+    results = []
+    for row_i, (img, arrow_center, arrow_box) in enumerate(image_entries):
+        context = KFParseContext(
+            image=img,
+            heroes=heroes,
+            arrow_center=arrow_center,
+            arrow_box=arrow_box,
+            frame_i=frame_i,
+            row_i=row_i,
+        )
+        entry = KillFeedEntry.from_image(context)
+        if entry is not None:
+            results.append(entry)
+    return results
 
 
 def get_killfeed_entry_images(frame: np.ndarray, ref: np.ndarray,
@@ -228,7 +235,7 @@ def _merge_cluster(cluster: list[KillFeedEntry], debug: bool = False) -> KillFee
     assert player2 is not None, "Cluster has no player2 — should never happen"
 
     ability_votes = [e.ability for e in cluster if e.ability is not None]
-    ability = _majority_ability(ability_votes, n)
+    ability = _majority_ability(ability_votes, n, frame=anchor.frame)
 
     critical_votes = sum(e.is_critical for e in cluster)
     if critical_votes * 2 == n:
@@ -278,7 +285,7 @@ def _majority_player(players: list[KFPlayer | None]) -> KFPlayer | None:
     return key_to_player[counts.most_common(1)[0][0]]
 
 
-def _majority_ability(abilities: list[Ability], n: int) -> Ability | None:
+def _majority_ability(abilities: list[Ability], n: int, frame: int = -1) -> Ability | None:
     if not abilities:
         return None
     key_to_ability: dict[tuple, Ability] = {}
@@ -291,5 +298,5 @@ def _majority_ability(abilities: list[Ability], n: int) -> Ability | None:
     if top_count > n / 2:
         return key_to_ability[top_key]
     if top_count * 2 == n:
-        print(f'[KillFeed] Ability vote tie ({key_to_ability[top_key].name} {top_count}/{n}) — result is None')
+        print(f'[KillFeed] F#{frame} Ability vote tie ({key_to_ability[top_key].name} {top_count}/{n}) — result is None')
     return None

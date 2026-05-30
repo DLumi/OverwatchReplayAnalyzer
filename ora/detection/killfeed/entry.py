@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field as dc_field
+from dataclasses import dataclass, field as dc_field, fields as dc_fields
 
 import numpy as np
 
@@ -106,6 +106,10 @@ class KillFeedEntry:
 
         roles = assign_roles(found_main, context.arrow_center, debug=debug)
 
+        if 'object' not in roles:
+            print(f'F#{context.frame_i}:{context.row_i} No object role assigned!')
+            return None, context
+
         killed_hero, killed_match, killed_hero_team = roles['object']
         killfeed_entry = cls(frame=context.frame_i,
                              row=context.row_i,
@@ -187,6 +191,16 @@ class KillFeedEntry:
 
         if found_environmental:
             self.is_environmental = True
+
+    def as_dict(self):
+        return {'frame': self.frame,
+                'row': self.row,
+                'player1': self.player1.as_dict() if self.player1 is not None else None,
+                'player2': self.player2.as_dict() if self.player2 is not None else None,
+                'assists': [x.as_dict() for x in self.assists],
+                'ability': self.ability.name if self.ability is not None else None,
+                'is_critical': self.is_critical,
+                'is_environmental': self.is_environmental}
 
 
 def assign_roles(heroes: list, arrow_center: tuple[int, int],

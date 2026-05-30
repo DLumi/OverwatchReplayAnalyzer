@@ -6,8 +6,6 @@ from . import gui as Gui
 from .utils import image as ImageUtils
 from .player_old import Player
 from .killfeed_old import Killfeed
-from . import pool
-
 import time
 
 class Frame(object):

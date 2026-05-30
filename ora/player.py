@@ -16,9 +16,9 @@ class KFPlayer:
     team: int
     hero: Hero
 
-    def to_dict(self):
+    def as_dict(self):
         d = {
             'team': self.team,
-            'hero': self.hero,
+            'hero': self.hero.name,
         }
         return d
